@@ -1,0 +1,30 @@
+{
+  "name": "secret-scan",
+  "version": "1.0.0",
+  "description": "Scan files for hardcoded secrets — API keys, tokens, passwords, private keys. Zero deps.",
+  "main": "src/scanner.js",
+  "bin": {
+    "secret-scan": "src/cli.js"
+  },
+  "scripts": {
+    "test": "node --test test/"
+  },
+  "keywords": [
+    "secret",
+    "security",
+    "scan",
+    "leak",
+    "detection",
+    "ci",
+    "audit"
+  ],
+  "author": "sulthonzh",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "src/",
+    "README.md"
+  ]
+}
