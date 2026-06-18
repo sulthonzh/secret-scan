@@ -1,10 +1,68 @@
 # secret-scan
 
-Scan files for hardcoded secrets before they leak. Detects API keys, tokens, passwords, private keys, and database URLs in your source code.
+**Catch leaked API keys before they hit git.** Zero-dependency scanner that finds 20+ secret types — AWS, GitHub, Stripe, private keys, database URLs — in milliseconds.
+
+## Quick Start
+
+```bash
+# Scan your project right now
+npx secret-scan . --ci
+```
+
+That's it. Exit code 1 means secrets found. Add it to CI in 30 seconds.
 
 ## Why
 
 Credentials in git history is one of the most common security incidents. Once pushed, they're practically impossible to fully remove. `secret-scan` catches them **before** they reach your repo — in a pre-commit hook, CI pipeline, or ad-hoc audit.
+
+## Real-World Examples
+
+### 1. Git Pre-commit Hook (catch secrets before push)
+
+```bash
+# .git/hooks/pre-commit
+#!/bin/sh
+npx secret-scan --ci --quiet
+```
+
+Every commit now blocks if a secret is detected. No more leaked keys in git history.
+
+### 2. GitHub Actions CI Pipeline
+
+```yaml
+# .github/workflows/security.yml
+name: Security Scan
+on: [push, pull_request]
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npx secret-scan . --ci --json > scan-results.json
+      - run: cat scan-results.json
+        if: always()
+```
+
+### 3. Programmatic Scanning in Node.js
+
+```javascript
+const { scanText } = require('secret-scan');
+
+const code = `
+const AWS_KEY = "AKIAIOSFODNN7EXAMPLE";
+const GH_TOKEN = "ghp_1234567890abcdefghijklmnopqrstuvwxyzAB";
+`;
+
+const findings = scanText(code);
+console.log(findings);
+// [
+//   { patternId: 'aws-access-key', severity: 'critical', line: 2, ... },
+//   { patternId: 'github-token', severity: 'critical', line: 3, ... }
+// ]
+```
 
 ## Install
 
@@ -119,14 +177,6 @@ Or with husky:
     "precommit": "secret-scan --ci --quiet"
   }
 }
-```
-
-## CI Pipeline
-
-```yaml
-# GitHub Actions
-- name: Scan for secrets
-  run: npx secret-scan . --ci --quiet
 ```
 
 ## License

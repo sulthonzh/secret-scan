@@ -353,3 +353,87 @@ test('scanText detects generic secret env var', () => {
   const findings = scanText(content);
   assert.ok(findings.length >= 1);
 });
+
+// ─── Additional edge-case tests (v1.1.0) ────────────────
+
+test('scanLine detects Discord token', () => {
+  // Use clearly fake token value to avoid push protection
+  const fakeToken = 'A'.repeat(58);
+  const findings = scanLine(`discord_token = "${fakeToken}"`);
+  assert.ok(findings.some((f) => f.patternId === 'discord-token'));
+});
+
+test('scanLine detects MySQL connection string', () => {
+  const findings = scanLine('DB=mysql://root:secret_password@localhost:3306/mydb');
+  assert.ok(findings.some((f) => f.patternId === 'database-url'));
+});
+
+test('scanLine detects Redis connection string', () => {
+  const findings = scanLine('CACHE=redis://default:redis_password@redis.example.com:6379');
+  assert.ok(findings.some((f) => f.patternId === 'database-url'));
+});
+
+test('scanText with custom patterns', () => {
+  const customPattern = [{
+    id: 'custom-key',
+    name: 'Custom Key',
+    severity: 'high',
+    pattern: /CUSTOM_KEY_[A-Z0-9]{16}/g,
+    description: 'Custom API key',
+  }];
+  const content = 'key = CUSTOM_KEY_ABCDEF1234567890';
+  const findings = scanText(content, { patterns: customPattern });
+  assert.equal(findings.length, 1);
+  assert.equal(findings[0].patternId, 'custom-key');
+});
+
+test('redact handles exactly 12-char values', () => {
+  const result = redact('AKIAIOSFODNN');
+  assert.equal(result, '************');
+  assert.ok(!result.includes('A'));
+});
+
+test('redact handles 13-char values', () => {
+  const result = redact('AKIAIOSFODNN7');
+  assert.equal(result.slice(0, 4), 'AKIA');
+  assert.equal(result.slice(-4), 'DNN7');
+});
+
+test('scanLine with no matching patterns returns empty', () => {
+  const customPattern = [{
+    id: 'nope',
+    name: 'Nope',
+    severity: 'low',
+    pattern: /NEVER_MATCHES_THIS_ZZZ/g,
+    description: 'No match',
+  }];
+  assert.equal(scanLine('api_key: "sk_test_1234567890abcdef"', customPattern).length, 0);
+});
+
+test('shouldScan returns false for pnpm-lock.yaml', () => {
+  assert.ok(!shouldScan('pnpm-lock.yaml'));
+});
+
+test('shouldScan returns false for yarn.lock', () => {
+  assert.ok(!shouldScan('yarn.lock'));
+});
+
+test('summarize with only critical findings', () => {
+  const findings = [{ severity: 'critical' }, { severity: 'critical' }];
+  const summary = summarize(findings);
+  assert.equal(summary.critical, 2);
+  assert.equal(summary.high, 0);
+  assert.equal(summary.total, 2);
+});
+
+test('isAllowValue detects changeme', () => {
+  assert.ok(isAllowValue('changeme_password'));
+});
+
+test('isAllowValue detects ${VAR} pattern', () => {
+  assert.ok(isAllowValue('${API_KEY}'));
+});
+
+test('isAllowValue detects <TOKEN> pattern', () => {
+  assert.ok(isAllowValue('<TOKEN>'));
+});

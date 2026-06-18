@@ -104,7 +104,7 @@ const PATTERNS = [
     id: 'discord-token',
     name: 'Discord Token',
     severity: 'critical',
-    pattern: /(?:discord|bot)\s*(?:api[_-]?key|token)\s*[:=]\s*["']([A-Za-z0-9_\-\.]{50,72})["']/gi,
+    pattern: /(?:discord|bot)[_\-\s]*(?:api[_-]?key|token)\s*[:=]\s*["']([A-Za-z0-9_\-\.]{50,72})["']/gi,
     description: 'Discord bot/user token',
   },
   {
