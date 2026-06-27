@@ -1,5 +1,22 @@
 # Changelog
 
+## v1.2.0 — 2026-06-28
+
+### Added
+- ESLint flat config (eslint.config.js) with strict rules: no-unused-vars, no-undef, prefer-const, eqeqeq
+- c8 test coverage reporting (`npm run test:coverage`)
+- `lint` script in package.json
+- Comparison table in README (vs gitleaks, truffleHog, detect-secrets)
+- `coverage/` added to .gitignore
+
+### Fixed
+- Removed unused `PATTERNS` import from cli.js (ESLint catch)
+
+### Quality
+- Tests: 67/67 GREEN (100% pass rate)
+- Coverage: 100% statements, 93.54% branches, 100% functions, 100% lines
+- ESLint: CLEAN (0 errors, 0 warnings)
+
 ## v1.1.0 — 2026-06-19
 
 ### Fixed

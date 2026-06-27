@@ -179,6 +179,20 @@ Or with husky:
 }
 ```
 
+## How It Compares
+
+| Feature | secret-scan | gitleaks | truffleHog | detect-secrets |
+|---------|------------|----------|------------|---------------|
+| Dependencies | Zero | Go binary | Python + deps | Python + deps |
+| Install | `npx` — no install | Download binary | `pip install` | `pip install` |
+| CI integration | 1 line (`--ci` flag) | Config file | Config file | Config file |
+| Programmatic API | Yes (Node.js) | No | No | No |
+| Custom patterns | Yes (JS regex) | Yes (TOML) | Yes (JSON) | Yes (YAML) |
+| False-positive filtering | Built-in | Manual | Manual | Manual |
+| Speed | <1ms per file | Fast | Slow (entropy) | Medium |
+
+`gitleaks` and `truffleHog` are excellent tools, but they require installation and configuration. `secret-scan` is the zero-friction option for Node.js projects — `npx` and you're done.
+
 ## License
 
 MIT

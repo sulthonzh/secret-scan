@@ -3,7 +3,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { scanText, shouldScan, summarize, redact, severityLevel, PATTERNS } = require('./scanner.js');
+const { scanText, shouldScan, summarize, redact, severityLevel } = require('./scanner.js');
 
 function walk(dir, ignorePatterns, results = []) {
   let entries = [];
