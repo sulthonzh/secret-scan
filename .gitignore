@@ -2,3 +2,11 @@ node_modules/
 *.log
 .DS_Store
 coverage/
+dist/
+build/
+.env
+.env.*
+__pycache__/
+.venv/
+*.egg-info/
+.mypy_cache/
