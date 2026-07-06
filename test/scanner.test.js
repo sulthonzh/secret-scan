@@ -437,3 +437,38 @@ test('isAllowValue detects ${VAR} pattern', () => {
 test('isAllowValue detects <TOKEN> pattern', () => {
   assert.ok(isAllowValue('<TOKEN>'));
 });
+
+// ─── Branch coverage: match[1] placeholder skip ──────────
+
+test('scanLine skips when capture group is a placeholder value', () => {
+  // Pattern with capture group: api_key="<VALUE>"
+  // match[1] = '<VALUE>' which isAllowValue should catch
+  const customPattern = [{
+    id: 'capture-group-test',
+    name: 'Capture Group Test',
+    severity: 'high',
+    pattern: /api_key\s*[=:]\s*["']([^"']+)["']/g,
+    description: 'Test',
+  }];
+  // '<YOUR_KEY>' is a placeholder → should be skipped via match[1] check
+  const findings = scanLine('api_key = "<YOUR_KEY>"', customPattern);
+  assert.equal(findings.length, 0);
+});
+
+// ─── Branch coverage: shouldScan with RegExp patterns ─────
+
+test('shouldScan handles RegExp ignore patterns', () => {
+  // Custom RegExp objects (same type as DEFAULT_IGNORE_PATTERNS)
+  const regexPatterns = [/vendor\//, /\.min\.js$/];
+  assert.ok(!shouldScan('vendor/jquery.js', regexPatterns));
+  assert.ok(!shouldScan('dist/bundle.min.js', regexPatterns));
+  assert.ok(shouldScan('src/app.js', regexPatterns));
+});
+
+test('shouldScan handles string ignore patterns', () => {
+  // String patterns exercise the typeof p === 'string' branch
+  const stringPatterns = ['^vendor/', '\\.test\\.js$'];
+  assert.ok(!shouldScan('vendor/jquery.js', stringPatterns));
+  assert.ok(!shouldScan('src/app.test.js', stringPatterns));
+  assert.ok(shouldScan('src/app.js', stringPatterns));
+});

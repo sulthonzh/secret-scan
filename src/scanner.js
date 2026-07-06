@@ -188,8 +188,8 @@ function scanLine(line, patterns = PATTERNS) {
       // Skip allowlisted values
       if (isAllowValue(matchedValue)) continue;
 
-      // Skip if the captured group looks like a placeholder
-      if (match[1] && isAllowValue(match[1])) continue;
+      // Note: match[1] placeholder check removed — redundant since
+      // matchedValue = match[1] || match[0], so isAllowValue above already covers it
 
       findings.push({
         patternId: p.id,
