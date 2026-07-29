@@ -1,6 +1,6 @@
 {
   "name": "secret-scan",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Scan files for hardcoded secrets — API keys, tokens, passwords, private keys. Zero deps.",
   "main": "src/scanner.js",
   "bin": {
@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "node --test test/*.test.js",
-    "test:coverage": "c8 node --test test/*.test.js",
+    "test:coverage": "c8 --include 'src/**/*.js' node --test test/*.test.js",
     "lint": "eslint .",
     "prepublishOnly": "npm test && npm run lint"
   },
