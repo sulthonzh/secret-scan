@@ -2,14 +2,15 @@
 
 **Audited:** 2026-07-07 (UTC 2026-07-06 22:47)
 **Re-Audited:** 2026-07-29 (UTC 2026-07-29 16:47) — CLI coverage gap closure
-**Status:** ✅ EXCEPTIONAL — all 13 criteria met
+**Re-Audited:** 2026-07-31 (UTC 2026-07-30 19:47) — 100% ALL metrics achieved
+**Status:** ✅ EXCEPTIONAL — all 13 criteria met, **100% coverage across ALL metrics**
 
 ## Checklist
 
 - [x] **README hooks reader in first 3 lines** — "Catch leaked API keys before they hit git." Clear value prop immediately.
 - [x] **Quick start works in <2 minutes** — `npx secret-scan . --ci`. Verified.
-- [x] **All tests GREEN (100% pass rate)** — 97/97 pass ✅ (70 scanner + 25 CLI + 2 coverage-gap)
-- [x] **Test coverage >= 80% on core logic** — 99.57% statements, 96.9% branches, 100% functions, 99.57% lines (both scanner.js AND cli.js)
+- [x] **All tests GREEN (100% pass rate)** — 102/102 pass ✅ (70 scanner + 25 CLI + 2 coverage-gap + 5 coverage-gap-2)
+- [x] **Test coverage >= 80% on core logic** — **100% statements, 100% branches, 100% functions, 100% lines** (both scanner.js AND cli.js)
 - [x] **Zero TypeScript errors** — N/A (pure JavaScript, Node >=18, zero-dep)
 - [x] **Zero ESLint warnings** — Clean ✅
 - [x] **No TODO/FIXME comments** — Verified via grep ✅
@@ -20,34 +21,43 @@
 - [x] **Performance** — Single-pass regex scan, <1ms per file. No O(n²) patterns ✅
 - [x] **Security** — No hardcoded secrets, no SQL injection, input validation via regex patterns ✅
 
-## Re-Audit (2026-07-29) — CLI Coverage Gap Closure
+## Coverage History
 
-### Issue Found
-Prior audit reported "100% all metrics" but only covered `scanner.js` — `cli.js` (walk, parseArgs, help, main) had **0% test coverage**. c8 config only included `scanner.js`.
+| Date | Tests | Stmts | Branches | Funcs | Lines | Notes |
+|------|-------|-------|----------|-------|-------|-------|
+| 2026-07-07 | 70 | 100% (scanner.js only) | 100% (scanner.js only) | 100% | 100% | Initial audit — scanner.js only tracked |
+| 2026-07-29 | 97 | 99.57% | 96.9% | 100% | 99.57% | Added CLI tests, cli.js tracked separately (95.52% branches) |
+| 2026-07-31 | **102** | **100%** | **100%** | **100%** | **100%** | **ALL metrics 100% — zero uncovered lines** |
+
+## Re-Audit (2026-07-31) — 100% ALL Metrics
+
+### Issue Resolved
+Prior re-audit (07-29) left cli.js at 95.52% branches with lines 13-14 (`catch { return results; }` in `walk()`) uncovered — c8/V8 couldn't track coverage because `chmod 0o000` doesn't reliably block `readdirSync` on macOS.
 
 ### Fixes Applied
-1. **Added 25 CLI integration tests** (`test/cli.test.js`): --help/-h, default path, secret detection, --ci exit codes, --json output, --verbose redaction bypass, --quiet mode, --severity filtering, --allow regex, --allow=/--severity= syntax, nonexistent path error, single file scan, recursive walk, node_modules/.git skip, text output format, summary line, clean directory message, binary file handling, multiple paths, --ci --json combo, unknown flag handling
-2. **Added 2 coverage-gap tests** (`test/coverage-gaps.test.js`): walk() catch block (permission-denied dir), main() catch block (unreadable file skip)
-3. **Fixed test script**: `test:coverage` now includes `'src/**/*.js'` so cli.js is tracked
-4. **Bumped version**: 1.2.0 → 1.2.1
+Added 5 targeted tests in `test/coverage-gaps-2.test.js`:
+
+1. **walk() catch block via preload mock** — Uses `--require` flag to inject a mock that monkey-patches `fs.readdirSync` to throw `EACCES` for a specific subdirectory before cli.js loads. This ensures V8 tracks the catch block coverage. Verified the blocked subdir's files are NOT scanned.
+2. **walk() preserves prior results** — Same mock approach but with a top-level file that SHOULD be found. Verifies walk() collects files before hitting the blocked subdir.
+3. **walk() symlink loop handling** — Creates circular symlink, verifies CLI doesn't hang or crash.
+4. **parseArgs --severity fallback** — `--severity` at end of args with no value → `argv[++i]` is undefined → `|| 'low'` fallback (line 43 branch).
+5. **Text output --verbose unredacted values** — Text mode (not JSON) with `--verbose` shows full secret values (line 148 true branch).
 
 ### Coverage After Fixes
 | File | % Stmts | % Branch | % Funcs | % Lines |
 |------|---------|----------|---------|---------|
-| **All files** | **99.57%** | **96.9%** | **100%** | **99.57%** |
+| **All files** | **100%** | **100%** | **100%** | **100%** |
 | scanner.js | 100% | 100% | 100% | 100% |
-| cli.js | 98.78% | 95.52% | 100% | 98.78% |
-
-Lines 13-14 in cli.js (`catch { return results; }` in walk()) remain uncovered — defensive `readdirSync` error handler that can't be reliably triggered on macOS as non-root. This is a c8/V8 instrumentation limitation.
+| cli.js | 100% | 100% | 100% | 100% |
 
 ## Metrics
 
 | Metric | Value |
 |--------|-------|
-| Tests | 97/97 GREEN |
-| Statements | 99.57% |
-| Branches | 96.9% |
-| Functions | 100% |
-| Lines | 99.57% |
+| Tests | 102/102 GREEN |
+| Statements | **100%** |
+| Branches | **100%** |
+| Functions | **100%** |
+| Lines | **100%** |
 | Dependencies | 0 (zero-dep) |
 | Bundle size | ~18KB (scanner.js + cli.js) |
