@@ -7,8 +7,8 @@
     "secret-scan": "src/cli.js"
   },
   "scripts": {
-    "test": "node --test test/*.test.js",
-    "test:coverage": "c8 --include 'src/**/*.js' node --test test/*.test.js",
+    "test": "node --test --test-concurrency=1 test/*.test.js",
+    "test:coverage": "c8 --include 'src/**/*.js' node --test --test-concurrency=1 test/*.test.js",
     "lint": "eslint .",
     "prepublishOnly": "npm test && npm run lint"
   },
