@@ -47,5 +47,8 @@
       "default": "./src/scanner.js"
     },
     "./cli": "./src/cli.js"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
